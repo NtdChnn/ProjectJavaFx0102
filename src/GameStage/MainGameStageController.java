@@ -49,20 +49,24 @@ public class MainGameStageController implements Initializable {
     private int playerLeftBalance = 0;
     private int comLeftBalance = 0;
     private int potLeftBalance = 0;
+    private String playerHasPlay = "";
+    private String comHasPlay = "";
 
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        turnPlayed = 0;
+        TURNPlayed = 0;
         randCard();
         playerName.setText("Name");
         playerShowBalance(1500,0);
         comShowBalance(1500, 0);
         potShowBalance(0, 0);
         loadImageTurn(turnPlayed);
-        comOnHand.setText("");
         showHandRank(turnPlayed, "player");
+        comOnHand.setText("");
         setButton(TURNPlayed);
     }
     
@@ -152,6 +156,20 @@ public class MainGameStageController implements Initializable {
         } else comOnHand.setText(handRank);
     }
     
+//    private void normalTurn (int turnPlayed , int TURNPlayed){
+//    }
+    
+//    private void lastTurn (int TURNPlayed){
+//    }
+    
+//    private String compareHandRank (){
+//        return "winner";
+//    }
+    
+//    private void comTurn (int turnPlayed, int TURNPlayed)
+//    {
+//    }
+    
     
     
     @FXML
@@ -192,6 +210,7 @@ public class MainGameStageController implements Initializable {
 
     @FXML
     private void resetBtnAction(ActionEvent event) {
+        
     }
 
     @FXML
@@ -200,6 +219,7 @@ public class MainGameStageController implements Initializable {
 
     @FXML
     private void mainMenuBtnAction(ActionEvent event) {
+        //return to mainMenu
     }
 
     @FXML
@@ -231,11 +251,11 @@ public class MainGameStageController implements Initializable {
         for (int i = 0; i < 9; i++) {
             int suit;
             int num;
-            //do {
+            do {
                 suit = rand.nextInt(4); //Club = 0, Spade = 1, Heart = 2,Diamond = 3
                 num = rand.nextInt(13) + 2; // 2 = 2, 3 = 3 ... J = 11, Q = 12, K = 13, A = 14 
                 recheck[suit][num - 2]++; 
-            //} while (recheck[suit][num - 2] > 1); 
+            } while (recheck[suit][num - 2] > 1); 
             if (i < 5) { //random card in POT
                 suitPot[i] = suit;
                 numPot[i] = num;
