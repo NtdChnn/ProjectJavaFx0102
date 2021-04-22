@@ -60,9 +60,9 @@ public class MainGameStageController implements Initializable {
         playerShowBalance(1500,0);
         comShowBalance(1500, 0);
         potShowBalance(0, 0);
-        loadImageTurn(3);
+        loadImageTurn(turnPlayed);
         comOnHand.setText("");
-        showHandRank(3, "player");
+        showHandRank(turnPlayed, "player");
         setButton(TURNPlayed);
     }
     
