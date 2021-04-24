@@ -242,13 +242,13 @@ public class MainGameStageController implements Initializable {
         if(compareHandRank() == 1)
         {
             return "Computer win";
-        } else if(compareHandRank() == 2)
+        } else if(compareHandRank() == 0)
         {
             return "You win";
         } else {return "Draw";}
     }
     
-    private int compareHandRank (){ // 0 = playerWin 1 = comWin 2 = Draw
+    private int compareHandRank (){ // 0 = playerWin, 1 = comWin, 2 = Draw
         if(checkHandRank(4, "com") > checkHandRank(4, "player"))
         {
             return 1;
