@@ -28,9 +28,9 @@ import javafx.scene.shape.Circle;
 public class MainGameStageController implements Initializable {
 
     @FXML
-    private Button flodBtn, checkBtn, callBtn, raiseBtn, btn500, btn100, btn50, btn20, allInBtn, resetBtn, confirmBtn, mainMenuBtn, restartBtn;
+    private Button flodBtn, checkBtn, callBtn, raiseBtn, btn500, btn100, btn50, btn20, allInBtn, resetBtn, confirmBtn, mainMenuBtn, restartBtn,continueBtn;
     @FXML
-    private Label comBalance, potBalance, playerName, playerBalance, playerOnHand, comOnHand, comPlay, playerPlay, playerRiseBalance;
+    private Label comBalance, potBalance, playerName, playerBalance, playerOnHand, comOnHand, comPlay, playerPlay, playerRiseBalance,winLebal;
     @FXML
     private Circle comButton, playerBtn;
     @FXML
@@ -68,124 +68,136 @@ public class MainGameStageController implements Initializable {
         showHandRank(turnPlayed, "player");
         comOnHand.setText("");
         setButton(TURNPlayed);
+        playerHasPlay = "";
+        comHasPlay = "";
+        winLebal.setText("");
+        firstTurn(TURNPlayed);
+    }
+    
+    private void firstTurn (int TURNPlayed){
+        if(TURNPlayed%2 == 0) //Player is 1st player
+        {
+            playerHasPlay = "raise";
+            playerPlay.setText(playerHasPlay);
+            if(playerLeftBalance >= 50)
+            {
+                playerShowBalance(0, 50);
+                potShowBalance(50, 0);
+            } else {
+                playerShowBalance(0, playerLeftBalance);
+                potShowBalance(playerLeftBalance, 0);    
+            }
+            comTurn(turnPlayed, playerHasPlay, playerLeftBalance, comLeftBalance);
+        } else //Com is 1st player
+        {
+            comHasPlay = "raise";
+            comPlay.setText(comHasPlay);
+            if(comLeftBalance >= 50)
+            {
+                comShowBalance(0, 50);
+                potShowBalance(50, 0);
+            } else {
+                comShowBalance(0, comLeftBalance);
+                potShowBalance(comLeftBalance, 0);
+            }
+            playerTurn(comHasPlay);
+        }
+    }
+        
+    private void normalTurn (int turnPlayed){
+    }
+    
+    private void lastTurn (){
+        loadImageTurn(4);
+        winLebal.setText(compareHandRank());
+        continueBtn.setOpacity(1);
+        continueBtn.setDisable(false);
     }
     
     private void setButton (int TURNPlayed)
     {
-        if(TURNPlayed % 2 == 0)
+        System.out.println("SetButton");
+        if(TURNPlayed % 2 == 0) //Player is 1st player
         {
             playerBtn.setVisible(true);
             comButton.setVisible(false);
-        } else
+        } else //Com is 1st player
         {
             playerBtn.setVisible(false);
             comButton.setVisible(true);
         }
     }
-        
-    private int checkHandRank(int turnPlayed,String who)
+    
+    private void setBtn (String comHasPlay, int playerLeftBalance, int comLeftBalance)
     {
-        if(checkStraight(turnPlayed, who) == 2 && checkFlush(turnPlayed, who) == true)
+        if(comLeftBalance == 0 || playerLeftBalance == 0)
         {
-            return 10; //#1 Royal Straight Flush
-        } else if (checkStraight(turnPlayed, who) == 1 && checkFlush(turnPlayed, who) == true)
+            flodBtn.setDisable(true);
+            checkBtn.setDisable(false);
+            callBtn.setDisable(true);
+            raiseBtn.setDisable(true);
+        } else if(comHasPlay == "check")
         {
-            return 9; //#2 Straight Flush
-        } else if (checkFourOfKind(turnPlayed, who) == true)
+            flodBtn.setDisable(false);
+            checkBtn.setDisable(false);
+            callBtn.setDisable(true);
+            raiseBtn.setDisable(false);
+        } else if(comHasPlay == "call")
         {
-            return 8; //#3 Four Of Kind
-        } else if (checkThreeOfKind(turnPlayed, who) == 2)
+            flodBtn.setDisable(false);
+            checkBtn.setDisable(false);
+            callBtn.setDisable(true);
+            raiseBtn.setDisable(false);
+        } else if(comHasPlay == "raise")
         {
-            return 7; //#4 Full House (1 Three Of Kind and 1 Pair)
-        } else if (checkThreeOfKind(turnPlayed, who) == 1 && checkPair(turnPlayed, who) >= 1)
+            flodBtn.setDisable(false);
+            checkBtn.setDisable(true);
+            callBtn.setDisable(false);
+            raiseBtn.setDisable(false);
+        }
+    }
+   
+    
+    private String compareHandRank (){
+        if(checkHandRank(5, "com") > checkHandRank(5, "player"))
         {
-            return 7; //#4 Full House (1 Three Of Kind and 1 Pair)
-        } else if (checkFlush(turnPlayed,who) == true)
+            return "Computer is winner";
+        } else if(checkHandRank(5, "player") > checkHandRank(5, "com"))
         {
-            return 6; //#5 Flush
-        } else if (checkStraight(turnPlayed, who) == 1)
-        {
-            return 5; //#6 Straight
-        } else if (checkThreeOfKind(turnPlayed, who) == 1)
-        {
-            return 4; //#7 Three Of Kind
-        } else if (checkPair(turnPlayed, who) >= 2)
-        {
-            return 3; //#8 Two Pair
-        } else if (checkPair(turnPlayed, who) == 1)
-        {
-            return 2; //#9 One Pair
-        } else return 1; //High Card
+            return "You is winner";
+        } else {return "Draw";}
     }
     
-    private void showHandRank(int turnPlayed,String who)
+    private void comTurn (int turnPlayed , String playerHasplay, int playerLeftBalance, int comLeftBalance)
     {
-        String handRank;
-        if(checkHandRank(turnPlayed, who) == 10)
-        {
-            handRank = "Royal Straight Flush";
-        } else if(checkHandRank(turnPlayed, who) == 9)
-        {
-            handRank = "Straight Flush";
-        } else if(checkHandRank(turnPlayed, who) == 8)
-        {
-            handRank = "Four Of Kind";
-        } else if(checkHandRank(turnPlayed, who) == 7)
-        {
-            handRank = "Full House";
-        }else if(checkHandRank(turnPlayed, who) == 6)
-        {
-            handRank = "Flush";
-        }else if(checkHandRank(turnPlayed, who) == 5)
-        {
-            handRank = "Straight";
-        }else if(checkHandRank(turnPlayed, who) == 4)
-        {
-            handRank = "Three Of Kind";
-        }else if(checkHandRank(turnPlayed, who) == 3)
-        {
-            handRank = "Two Pair";
-        }else if(checkHandRank(turnPlayed, who) == 2)
-        {
-            handRank = "One Pair";
-        }else handRank = "High Card";
-        
-        if(who == "player")
-        {
-            playerOnHand.setText(handRank);
-        } else comOnHand.setText(handRank);
     }
     
-//    private void normalTurn (int turnPlayed , int TURNPlayed){
-//    }
-    
-//    private void lastTurn (int TURNPlayed){
-//    }
-    
-//    private String compareHandRank (){
-//        return "winner";
-//    }
-    
-//    private void comTurn (int turnPlayed, int TURNPlayed)
+    private void playerTurn (String comHasPlay)
+    {
+        
+    }
+//    private void showWhatPlay (String who ,String whatPlay)
 //    {
 //    }
     
-    
-    
     @FXML
     private void flodBtnAction(ActionEvent event) {
+        playerHasPlay = "flod";
     }
 
     @FXML
     private void checkBtnAction(ActionEvent event) {
+        playerHasPlay = "check";
     }
 
     @FXML
     private void callBtnAction(ActionEvent event) {
+        playerHasPlay = "call";
     }
 
     @FXML
     private void raiseBtnAction(ActionEvent event) {
+        playerHasPlay = "raise";
     }
 
     @FXML
@@ -226,8 +238,13 @@ public class MainGameStageController implements Initializable {
     private void restartBtnAction(ActionEvent event) {
     }
     
-        private void playerShowBalance(int plus, int minus)
+    @FXML
+    private void continueBtnAction(ActionEvent event) {
+    }
+    
+    private void playerShowBalance(int plus, int minus)
     {
+        System.out.println("playerShowBalance");
         playerLeftBalance += plus;
         playerLeftBalance -= minus;
         playerBalance.setText(String.valueOf(playerLeftBalance));
@@ -235,6 +252,7 @@ public class MainGameStageController implements Initializable {
     
     private void comShowBalance(int plus, int minus)
     {
+        System.out.println("comShowBalance");
         comLeftBalance += plus;
         comLeftBalance -= minus;
         comBalance.setText(String.valueOf(comLeftBalance));
@@ -242,12 +260,14 @@ public class MainGameStageController implements Initializable {
     
     private void potShowBalance(int plus, int minus)
     {
+        System.out.println("potShowBalance");
         potLeftBalance += plus;
         potLeftBalance -= minus;
         potBalance.setText(String.valueOf(potLeftBalance));
     }
 
     private void randCard() { //random Card 
+        System.out.println("randCard");
         for (int i = 0; i < 9; i++) {
             int suit;
             int num;
@@ -271,12 +291,14 @@ public class MainGameStageController implements Initializable {
     }
 
     private void loadImage(ImageView imageView, int suit, int num) { //get Image from pic *00 is back Card
+        System.out.println("loadImage");
         Image image = new Image(getClass().getResourceAsStream("pic/" + suit + num + ".png"));
         imageView.setImage(image);
     }
 
     private void loadImageTurn(int turnPlayed)
     {
+        System.out.println("loadImageTurn");
         if(turnPlayed >= 0)
         {
         loadImage(player01, suitPlay[0], numPlay[0]);
@@ -312,25 +334,29 @@ public class MainGameStageController implements Initializable {
     }
     
     private ArrayList collectCardPlayer(int turn, String type){ 
-        
+        System.out.println("collectCardPlayer");
         ArrayList<Integer> collectCard = new ArrayList<>(); //CollectCard Pot-Player / turn
         if("num".equals(type))
         {
         for (int i = 0; i < 2; i++) {
+            System.out.println("play");
             collectCard.add(numPlay[i]);
             }
-        if (turn == 1 || turn == 2 || turn == 3) {
+        if (turn >= 1) {
             for (int i = 0; i < 2 + turn; i++) {
                 collectCard.add(numPot[i]);
+                System.out.println("pot");
                 }
             }
         } else if (type == "suit")
         {
            for (int i = 0; i < 2; i++) {
+               System.out.println("Splay");
             collectCard.add(suitPlay[i]);
             }
-        if (turn == 1 || turn == 2 || turn == 3) {
+        if (turn >= 1) {
             for (int i = 0; i < 2 + turn; i++) {
+                System.out.println("Spot");
                 collectCard.add(suitPot[i]);
                 }
             } 
@@ -341,14 +367,14 @@ public class MainGameStageController implements Initializable {
     }
     
     private ArrayList collectCardCom(int turn, String type){
-        
+        System.out.println("collectCardCom");
         ArrayList<Integer> collectCard = new ArrayList<>(); //CollectCard Pot-Com / turn
         if("num".equals(type))
         {
         for (int i = 0; i < 2; i++) {
             collectCard.add(numCom[i]);
             }
-        if (turn == 1 || turn == 2 || turn == 3) {
+        if (turn >= 1) {
             for (int i = 0; i < 2 + turn; i++) {
                 collectCard.add(numPot[i]);
                 }
@@ -371,6 +397,7 @@ public class MainGameStageController implements Initializable {
     
     
     private int checkStraight(int turn ,String who) {
+        System.out.println("checkStraight");
         int isStraight = 0;
         int check = 0;
         ArrayList<Integer> collectCard = new ArrayList<>();
@@ -382,9 +409,10 @@ public class MainGameStageController implements Initializable {
         if (turn > 0) { //CheckStraight
             Collections.sort(collectCard);
             for (int i = 0; i < collectCard.size() - 1; i++) {
-                while(Objects.equals(collectCard.get(i), collectCard.get(i + 1)) && i != collectCard.size())
+                while(Objects.equals(collectCard.get(i), collectCard.get(i + 1)) && i != collectCard.size()-2)
                 { i++; }
-                if (Objects.equals(collectCard.get(i)+1, collectCard.get(i + 1))) {
+                if (Objects.equals(collectCard.get(i)+1, collectCard.get(i + 1)) && i != collectCard.size()-2) 
+                { 
                     check++;
                 } else {
                     check = 0;
@@ -405,6 +433,7 @@ public class MainGameStageController implements Initializable {
     }
     
     private boolean checkFlush(int turn , String who){
+        System.out.println("checkFlush");
         boolean isFlush = false;
         int check = 0;
         ArrayList<Integer> collectCard = new ArrayList<>();
@@ -434,6 +463,7 @@ public class MainGameStageController implements Initializable {
     
     private boolean checkFourOfKind(int turn , String who)
     {
+        System.out.println("checkFourOfKind");
         boolean isFOK = false;
         int check = 0;
         ArrayList<Integer> collectCard = new ArrayList<>();
@@ -463,6 +493,7 @@ public class MainGameStageController implements Initializable {
     
     private int checkThreeOfKind(int turn , String who)
     {
+        System.out.println("checkThreeOfKind");
         int numOfTOK = 0;
         int check = 0;
         ArrayList<Integer> collectCard = new ArrayList<>();
@@ -492,6 +523,7 @@ public class MainGameStageController implements Initializable {
     
     private int checkPair(int turn , String who)
     {
+        System.out.println("checkPair");
         int numOfPair = 0;
         int check = 0;
         ArrayList<Integer> collectCard = new ArrayList<>();
@@ -522,4 +554,80 @@ public class MainGameStageController implements Initializable {
 
         return numOfPair;
     }
+        
+    private int checkHandRank(int turnPlayed,String who)
+    {
+        System.out.println("checkHandRank");
+        if(checkStraight(turnPlayed, who) == 2 && checkFlush(turnPlayed, who) == true)
+        {
+            return 10; //#1 Royal Straight Flush
+        } else if (checkStraight(turnPlayed, who) == 1 && checkFlush(turnPlayed, who) == true)
+        {
+            return 9; //#2 Straight Flush
+        } else if (checkFourOfKind(turnPlayed, who) == true)
+        {
+            return 8; //#3 Four Of Kind
+        } else if (checkThreeOfKind(turnPlayed, who) == 2)
+        {
+            return 7; //#4 Full House (1 Three Of Kind and 1 Pair)
+        } else if (checkThreeOfKind(turnPlayed, who) == 1 && checkPair(turnPlayed, who) >= 1)
+        {
+            return 7; //#4 Full House (1 Three Of Kind and 1 Pair)
+        } else if (checkFlush(turnPlayed,who) == true)
+        {
+            return 6; //#5 Flush
+        } else if (checkStraight(turnPlayed, who) == 1)
+        {
+            return 5; //#6 Straight
+        } else if (checkThreeOfKind(turnPlayed, who) == 1)
+        {
+            return 4; //#7 Three Of Kind
+        } else if (checkPair(turnPlayed, who) >= 2)
+        {
+            return 3; //#8 Two Pair
+        } else if (checkPair(turnPlayed, who) == 1)
+        {
+            return 2; //#9 One Pair
+        } else return 1; //High Card
+    }
+    
+    private void showHandRank(int turnPlayed,String who)
+    {
+        System.out.println("showHandRank");
+        String handRank;
+        if(checkHandRank(turnPlayed, who) == 10)
+        {
+            handRank = "Royal Straight Flush";
+        } else if(checkHandRank(turnPlayed, who) == 9)
+        {
+            handRank = "Straight Flush";
+        } else if(checkHandRank(turnPlayed, who) == 8)
+        {
+            handRank = "Four Of Kind";
+        } else if(checkHandRank(turnPlayed, who) == 7)
+        {
+            handRank = "Full House";
+        }else if(checkHandRank(turnPlayed, who) == 6)
+        {
+            handRank = "Flush";
+        }else if(checkHandRank(turnPlayed, who) == 5)
+        {
+            handRank = "Straight";
+        }else if(checkHandRank(turnPlayed, who) == 4)
+        {
+            handRank = "Three Of Kind";
+        }else if(checkHandRank(turnPlayed, who) == 3)
+        {
+            handRank = "Two Pair";
+        }else if(checkHandRank(turnPlayed, who) == 2)
+        {
+            handRank = "One Pair";
+        }else handRank = "High Card";
+        
+        if(who == "player")
+        {
+            playerOnHand.setText(handRank);
+        } else comOnHand.setText(handRank);
+    }
+
 }
