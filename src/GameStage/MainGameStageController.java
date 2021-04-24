@@ -370,9 +370,16 @@ public class MainGameStageController implements Initializable {
     private void comPlayRaise(int raise){
         showComPlay("raise");
         comRaise = 0;
+        if(comLeftBalance >= raise)
+        {
         comShowBalance(0, raise);
         potShowBalance(raise, 0);
         comRaise = raise;
+        } else {
+        comShowBalance(0, comLeftBalance);
+        potShowBalance(comLeftBalance, 0);
+        comRaise = comLeftBalance;
+        }
         playerTurn(comHasPlay);
     }
     
@@ -538,8 +545,14 @@ public class MainGameStageController implements Initializable {
     
     private void setPlayerRise(int plus, int minus)
     {
+        if(playerRaise+plus <= playerLeftBalance)
+        {
         playerRaise = playerRaise + plus - minus;
         playerRiseBalance.setText(String.valueOf(playerRaise));
+        } else {
+            playerRaise = playerLeftBalance;
+            playerRiseBalance.setText(String.valueOf(playerRaise));
+        }
     }
     
     private void playerShowBalance(int plus, int minus)
