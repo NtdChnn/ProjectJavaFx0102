@@ -75,7 +75,7 @@
       <Button fx:id="allInBtn" disable="true" layoutX="239.0" layoutY="452.0" mnemonicParsing="false" onAction="#allInBtnAction" text="ALL-IN" />
       <Button fx:id="resetBtn" disable="true" layoutX="242.0" layoutY="533.0" mnemonicParsing="false" onAction="#resetBtnAction" text="Reset" />
       <Label fx:id="comPlay" layoutX="562.0" layoutY="156.0" text="play" />
-      <Label fx:id="playerPlay" layoutX="564.0" layoutY="403.0" prefHeight="17.0" prefWidth="28.0" text="play" />
+      <Label fx:id="playerPlay" layoutX="564.0" layoutY="403.0" text="play" />
       <Circle fx:id="comButton" disable="true" fill="#ff1f1f" layoutX="351.0" layoutY="165.0" radius="13.0" stroke="BLACK" strokeType="INSIDE" />
       <Circle fx:id="playerBtn" disable="true" fill="#ff1f1f" layoutX="351.0" layoutY="412.0" radius="13.0" stroke="BLACK" strokeType="INSIDE" />
       <Label layoutX="231.0" layoutY="335.0" text="flop" />

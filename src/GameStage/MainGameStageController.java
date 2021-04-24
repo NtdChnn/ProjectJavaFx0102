@@ -11,6 +11,8 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Random;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -45,12 +47,14 @@ public class MainGameStageController implements Initializable {
     private int[] numCom = new int[2];
     private int[][] recheck = new int[4][13];
     private int turnPlayed = 0;
-    private int TURNPlayed = 0;
+    private int TURNPlay = 0;
     private int playerLeftBalance = 0;
     private int comLeftBalance = 0;
     private int potLeftBalance = 0;
     private String playerHasPlay = "";
     private String comHasPlay = "";
+    private int comRaise = 0;
+    private int playerRaise = 0;
 
     /**
      * Initializes the controller class.
@@ -58,24 +62,33 @@ public class MainGameStageController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         turnPlayed = 0;
-        TURNPlayed = 0;
-        randCard();
+        TURNPlay = 0;
         playerName.setText("Name");
         playerShowBalance(1500,0);
         comShowBalance(1500, 0);
         potShowBalance(0, 0);
-        loadImageTurn(turnPlayed);
-        showHandRank(turnPlayed, "player");
-        comOnHand.setText("");
-        setButton(TURNPlayed);
         playerHasPlay = "";
         comHasPlay = "";
-        winLebal.setText("");
-        firstTurn(TURNPlayed);
+        try {
+            firstTurn(TURNPlay);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(MainGameStageController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
-    private void firstTurn (int TURNPlayed){
-        if(TURNPlayed%2 == 0) //Player is 1st player
+    private void firstTurn (int TURNPlay) throws InterruptedException{
+        System.out.println("first");
+        turnPlayed = 0;
+        randCard();
+        continueBtn.setOpacity(0);
+        continueBtn.setDisable(true);
+        winLebal.setText("");
+        loadImageTurn(0);
+        showHandRank(0, "player");
+        comOnHand.setText("");
+        playerRiseBalance.setText("0");
+        setButton(TURNPlay);
+        if(TURNPlay%2 == 0) //Player is 1st player
         {
             playerHasPlay = "raise";
             playerPlay.setText(playerHasPlay);
@@ -83,9 +96,11 @@ public class MainGameStageController implements Initializable {
             {
                 playerShowBalance(0, 50);
                 potShowBalance(50, 0);
+                playerRaise = 50;
             } else {
                 playerShowBalance(0, playerLeftBalance);
-                potShowBalance(playerLeftBalance, 0);    
+                potShowBalance(playerLeftBalance, 0);
+                playerRaise = playerLeftBalance;
             }
             comTurn(turnPlayed, playerHasPlay, playerLeftBalance, comLeftBalance);
         } else //Com is 1st player
@@ -96,28 +111,82 @@ public class MainGameStageController implements Initializable {
             {
                 comShowBalance(0, 50);
                 potShowBalance(50, 0);
+                comRaise = 50;
             } else {
                 comShowBalance(0, comLeftBalance);
                 potShowBalance(comLeftBalance, 0);
+                comRaise = comLeftBalance;
             }
             playerTurn(comHasPlay);
         }
     }
         
-    private void normalTurn (int turnPlayed){
+    private void normalTurn (int turnPlayed, int TURNPlay,int playerLeftBalance , int comLeftBalance) throws InterruptedException{
+        System.out.println("normal");
+        this.turnPlayed++;
+        turnPlayed = this.turnPlayed;
+        System.out.println(this.turnPlayed);
+        playerHasPlay = "";
+        comHasPlay = "";
+        loadImageTurn(turnPlayed);
+        showHandRank(turnPlayed, "player");
+        System.out.println("?");
+        if(turnPlayed == 4 )
+        { 
+            System.out.println("goto last");
+            lastTurn(playerLeftBalance, comLeftBalance);
+        } else if (TURNPlay%2 == 0) //Player is 1st player
+        {
+            System.out.println("1");
+            playerTurn(comHasPlay);
+        } else { System.out.println("2"); comTurn(turnPlayed, playerHasPlay, playerLeftBalance, comLeftBalance);}
     }
     
-    private void lastTurn (){
-        loadImageTurn(4);
-        winLebal.setText(compareHandRank());
+    private void lastTurn (int playerLeftBalance , int comLeftBalance) throws InterruptedException{
+        System.out.println("last");
+        if (comHasPlay == "flod")
+        {
+        winLebal.setText("You win");
+        continueBtn.setOpacity(1);
+        continueBtn.setDisable(false); 
+        playerShowBalance(potLeftBalance, 0);
+        potShowBalance(0, potLeftBalance);
+        } else if (playerHasPlay == "flod")
+        {
+        winLebal.setText("Computer win");
         continueBtn.setOpacity(1);
         continueBtn.setDisable(false);
+        comShowBalance(potLeftBalance,0);
+        potShowBalance(0, potLeftBalance);
+        }else{
+        loadImageTurn(4);
+        showHandRank(4, "com");
+        showHandRank(4, "player");
+            if(compareHandRank() == 0)// 0 = playerWin, 1 = comWin, 2 = Draw
+            {
+                playerShowBalance(potLeftBalance, 0);
+                potShowBalance(0, potLeftBalance);
+            } else if (compareHandRank() == 1){
+                comShowBalance(potLeftBalance,0);
+                potShowBalance(0, potLeftBalance);
+            } else {
+                playerShowBalance(potLeftBalance/2, 0);
+                comShowBalance(potLeftBalance/2,0);
+                potShowBalance(0, potLeftBalance);
+            }
+        winLebal.setText(showcompareHandRank());
+        continueBtn.setOpacity(1);
+        continueBtn.setDisable(false);
+        }
+        
+        if(comLeftBalance == 0 || playerLeftBalance == 0)
+        {endGame(playerLeftBalance,comLeftBalance);}
     }
     
-    private void setButton (int TURNPlayed)
+    private void setButton (int TURNPlay)
     {
-        System.out.println("SetButton");
-        if(TURNPlayed % 2 == 0) //Player is 1st player
+        //System.out.println("SetButton");
+        if(TURNPlay % 2 == 0) //Player is 1st player
         {
             playerBtn.setVisible(true);
             comButton.setVisible(false);
@@ -154,79 +223,265 @@ public class MainGameStageController implements Initializable {
             checkBtn.setDisable(true);
             callBtn.setDisable(false);
             raiseBtn.setDisable(false);
+        } else{
+            flodBtn.setDisable(false);
+            checkBtn.setDisable(false);
+            callBtn.setDisable(true);
+            raiseBtn.setDisable(false);
         }
     }
    
     
-    private String compareHandRank (){
-        if(checkHandRank(5, "com") > checkHandRank(5, "player"))
+    private String showcompareHandRank (){
+        if(compareHandRank() == 1)
         {
-            return "Computer is winner";
-        } else if(checkHandRank(5, "player") > checkHandRank(5, "com"))
+            return "Computer win";
+        } else if(compareHandRank() == 2)
         {
-            return "You is winner";
+            return "You win";
         } else {return "Draw";}
     }
     
-    private void comTurn (int turnPlayed , String playerHasplay, int playerLeftBalance, int comLeftBalance)
+    private int compareHandRank (){ // 0 = playerWin 1 = comWin 2 = Draw
+        if(checkHandRank(4, "com") > checkHandRank(4, "player"))
+        {
+            return 1;
+        } else if(checkHandRank(4, "player") > checkHandRank(4, "com"))
+        {
+            return 0;
+        } else {return 2;}
+    }
+    
+    
+    private void comTurn (int turnPlayed , String playerHasplay, int playerLeftBalance, int comLeftBalance) throws InterruptedException
     {
+        comPlay.setText("Computer's Turn");
+        flodBtn.setDisable(true);
+        callBtn.setDisable(true);
+        checkBtn.setDisable(true);
+        raiseBtn.setDisable(true);
+        if(turnPlayed == 0 && playerHasplay == "raise")
+        {
+            comPlayCall();
+        } else if (playerLeftBalance == 0 || comLeftBalance == 0)
+        {
+            comPlayCheck(turnPlayed, TURNPlay, playerLeftBalance, comLeftBalance);
+        }else {
+            if(checkHandRank(turnPlayed, "com") == 1)
+            {
+                if(playerHasplay == "raise")
+                {
+                    comPlayFlod(playerLeftBalance,comLeftBalance);
+                }else if((rand.nextInt(120)+1)%12 == 0)
+                {
+                    comPlayFlod(playerLeftBalance,comLeftBalance);
+                } else if((rand.nextInt(120)+1)%60 == 0)
+                {
+                    comPlayRaise(50);
+                } else {comPlayCheck(turnPlayed, TURNPlay, playerLeftBalance, comLeftBalance);}
+            } else if(checkHandRank(turnPlayed, "com") <= 5)
+            {
+                if(playerHasplay == "raise")
+                {
+                    if(rand.nextInt(2) == 0)
+                    {
+                        comPlayCall();
+                    } else {comPlayFlod(playerLeftBalance,comLeftBalance);}
+                } else if((rand.nextInt(120)+1)%20 == 0)
+                {
+                    comPlayRaise(50);
+                } else if((rand.nextInt(120)+1)%20 == 0)
+                {
+                    comPlayRaise(100);
+                } else if((rand.nextInt(120)+1)%40 == 0)
+                {
+                    comPlayRaise(200);
+                } else if((rand.nextInt(120)+1)%60 == 0)
+                {
+                    comPlayRaise(500);
+                } else if((rand.nextInt(120)+1)%60 == 0)
+                {
+                    comPlayFlod(playerLeftBalance,comLeftBalance);
+                } else {comPlayCheck(turnPlayed, TURNPlay, playerLeftBalance, comLeftBalance);}
+            } else {
+                if(playerHasplay == "raise")
+                {
+                    comPlayCall();
+                } else if((rand.nextInt(120)+1)%40 == 0)
+                {
+                    comPlayRaise(100);
+                } else if((rand.nextInt(120)+1)%20 == 0)
+                {
+                    comPlayRaise(200);
+                } else if((rand.nextInt(120)+1)%10 == 0)
+                {
+                    comPlayRaise(500);
+                } else {comPlayCheck(turnPlayed, TURNPlay, playerLeftBalance, comLeftBalance);}
+            }
+        }
+    }
+    
+    private void comPlayCheck (int turnPlayed,int TURNPlay,int playerLeftBalance,int comLeftBalance) throws InterruptedException{
+        showComPlay("check");
+        if(playerHasPlay == "check")
+        {
+            
+            normalTurn(turnPlayed, TURNPlay, playerLeftBalance, comLeftBalance);
+        } else {
+            playerTurn(comHasPlay);
+        }
+    }
+    
+    private void comPlayCall() {
+        showComPlay("call");
+        //System.out.println(playerRaise);
+        comShowBalance(0, playerRaise);
+        potShowBalance(playerRaise, 0);
+        playerTurn(comHasPlay);
+    }
+    
+    private void comPlayFlod(int playerLeftBalance,int comLeftBalance) throws InterruptedException {
+        showComPlay("flod");
+        lastTurn(playerLeftBalance, comLeftBalance);
+    }
+    
+    private void comPlayRaise(int raise){
+        showComPlay("raise");
+        comRaise = 0;
+        comShowBalance(0, raise);
+        potShowBalance(raise, 0);
+        comRaise = raise;
+        playerTurn(comHasPlay);
+    }
+    
+    private void showComPlay(String comPlay)
+    {
+        comHasPlay = comPlay;
+        this.comPlay.setText(comPlay);
     }
     
     private void playerTurn (String comHasPlay)
     {
-        
+        playerPlay.setText("Name" + "'s Turn");
+        setBtn(comHasPlay, playerLeftBalance, comLeftBalance);
     }
-//    private void showWhatPlay (String who ,String whatPlay)
-//    {
-//    }
+    
+    private void endGame (int playerLeftBalance , int comLeftBalance)
+    {
+        if(playerLeftBalance == 0)
+        {
+        winLebal.setText("Computer is WINNER");
+        } else {winLebal.setText("Player is WINNER");}
+    }
     
     @FXML
-    private void flodBtnAction(ActionEvent event) {
+    private void flodBtnAction(ActionEvent event) throws InterruptedException {
         playerHasPlay = "flod";
+        playerPlay.setText("flod");
+        lastTurn(playerLeftBalance, comLeftBalance);
     }
 
     @FXML
-    private void checkBtnAction(ActionEvent event) {
+    private void checkBtnAction(ActionEvent event) throws InterruptedException {
+        System.out.println("pushCheck");
         playerHasPlay = "check";
+        playerPlay.setText("check");
+        if(comHasPlay == "check")
+        {
+            normalTurn(turnPlayed, TURNPlay, playerLeftBalance, comLeftBalance);
+        } else {
+            comTurn(turnPlayed, playerHasPlay, playerLeftBalance, comLeftBalance);
+        }
     }
 
     @FXML
-    private void callBtnAction(ActionEvent event) {
+    private void callBtnAction(ActionEvent event) throws InterruptedException {
         playerHasPlay = "call";
+        playerPlay.setText("call");
+        playerShowBalance(0, comRaise);
+        potShowBalance(comRaise, 0);
+        comTurn(turnPlayed, playerHasPlay, playerLeftBalance, comLeftBalance);
     }
 
     @FXML
     private void raiseBtnAction(ActionEvent event) {
         playerHasPlay = "raise";
+        playerPlay.setText("raise");
+        flodBtn.setDisable(true);
+        callBtn.setDisable(true);
+        checkBtn.setDisable(true);
+        setPlayerRise(0, playerRaise);
+        setRaiseBtn(playerLeftBalance);
     }
 
+    private void setRaiseBtn(int playerLeftBalance){
+        if(playerLeftBalance >= 500)
+        {
+            btn500.setDisable(false);
+        }
+        if(playerLeftBalance >= 100)
+        {
+            btn100.setDisable(false);
+        }
+        if(playerLeftBalance >= 50)
+        {
+            btn50.setDisable(false);
+        }
+        if(playerLeftBalance >= 20)
+        {
+            btn20.setDisable(false);
+        }
+        allInBtn.setDisable(false);
+        confirmBtn.setDisable(false);
+        resetBtn.setDisable(false);
+        playerRiseBalance.setDisable(false);
+    }
+   
+    
     @FXML
     private void btn500Action(ActionEvent event) {
+        setPlayerRise(500,0);
     }
 
     @FXML
     private void btn100Action(ActionEvent event) {
+        setPlayerRise(100,0);
     }
 
     @FXML
     private void btn50Action(ActionEvent event) {
+        setPlayerRise(50,0);
     }
 
     @FXML
     private void btn20Action(ActionEvent event) {
+        setPlayerRise(20,0);
     }
 
     @FXML
     private void allInBtnAction(ActionEvent event) {
+        setPlayerRise(playerLeftBalance, 0);
     }
 
     @FXML
     private void resetBtnAction(ActionEvent event) {
-        
+        setPlayerRise(0, playerRaise);
     }
 
     @FXML
-    private void confirmBtnAction(ActionEvent event) {
+    private void confirmBtnAction(ActionEvent event) throws InterruptedException {
+        playerShowBalance(0, playerRaise);
+        potShowBalance(playerRaise, 0);
+        //System.out.println(playerRaise);
+        btn500.setDisable(true);
+        btn100.setDisable(true);
+        btn50.setDisable(true);
+        btn20.setDisable(true);
+        resetBtn.setDisable(true);
+        allInBtn.setDisable(true);
+        playerRiseBalance.setDisable(true);
+        confirmBtn.setDisable(true);
+        comTurn(turnPlayed, playerHasPlay, playerLeftBalance, comLeftBalance);
     }
 
     @FXML
@@ -235,16 +490,36 @@ public class MainGameStageController implements Initializable {
     }
 
     @FXML
-    private void restartBtnAction(ActionEvent event) {
+    private void restartBtnAction(ActionEvent event) throws InterruptedException {
+        playerShowBalance(0,playerLeftBalance);
+        comShowBalance(0, comLeftBalance);
+        potShowBalance(0, potLeftBalance);
+        turnPlayed = 0;
+        TURNPlay = 0;
+        playerName.setText("Name");
+        playerShowBalance(1500,0);
+        comShowBalance(1500, 0);
+        potShowBalance(0, 0);
+        playerHasPlay = "";
+        comHasPlay = "";
+        firstTurn(TURNPlay);
     }
     
     @FXML
-    private void continueBtnAction(ActionEvent event) {
+    private void continueBtnAction(ActionEvent event) throws InterruptedException {
+        TURNPlay++;
+        firstTurn(TURNPlay);
+    }
+    
+    private void setPlayerRise(int plus, int minus)
+    {
+        playerRaise = playerRaise + plus - minus;
+        playerRiseBalance.setText(String.valueOf(playerRaise));
     }
     
     private void playerShowBalance(int plus, int minus)
     {
-        System.out.println("playerShowBalance");
+        //System.out.println("playerShowBalance");
         playerLeftBalance += plus;
         playerLeftBalance -= minus;
         playerBalance.setText(String.valueOf(playerLeftBalance));
@@ -252,7 +527,7 @@ public class MainGameStageController implements Initializable {
     
     private void comShowBalance(int plus, int minus)
     {
-        System.out.println("comShowBalance");
+        //System.out.println("comShowBalance");
         comLeftBalance += plus;
         comLeftBalance -= minus;
         comBalance.setText(String.valueOf(comLeftBalance));
@@ -260,14 +535,14 @@ public class MainGameStageController implements Initializable {
     
     private void potShowBalance(int plus, int minus)
     {
-        System.out.println("potShowBalance");
+        //System.out.println("potShowBalance");
         potLeftBalance += plus;
         potLeftBalance -= minus;
         potBalance.setText(String.valueOf(potLeftBalance));
     }
 
     private void randCard() { //random Card 
-        System.out.println("randCard");
+        //System.out.println("randCard");
         for (int i = 0; i < 9; i++) {
             int suit;
             int num;
@@ -291,14 +566,14 @@ public class MainGameStageController implements Initializable {
     }
 
     private void loadImage(ImageView imageView, int suit, int num) { //get Image from pic *00 is back Card
-        System.out.println("loadImage");
+        //System.out.println("loadImage");
         Image image = new Image(getClass().getResourceAsStream("pic/" + suit + num + ".png"));
         imageView.setImage(image);
     }
 
     private void loadImageTurn(int turnPlayed)
     {
-        System.out.println("loadImageTurn");
+        //System.out.println("loadImageTurn");
         if(turnPlayed >= 0)
         {
         loadImage(player01, suitPlay[0], numPlay[0]);
@@ -339,24 +614,34 @@ public class MainGameStageController implements Initializable {
         if("num".equals(type))
         {
         for (int i = 0; i < 2; i++) {
-            System.out.println("play");
+            //System.out.println("play");
             collectCard.add(numPlay[i]);
             }
-        if (turn >= 1) {
+        if (turn >= 3) {
+            for (int i = 0; i < 5; i++) {
+                collectCard.add(numPot[i]);
+                //System.out.println("pot");
+            }
+        }else if (turn >= 1) {
             for (int i = 0; i < 2 + turn; i++) {
                 collectCard.add(numPot[i]);
-                System.out.println("pot");
+                //System.out.println("pot");
                 }
             }
         } else if (type == "suit")
         {
            for (int i = 0; i < 2; i++) {
-               System.out.println("Splay");
+               //System.out.println("Splay");
             collectCard.add(suitPlay[i]);
             }
-        if (turn >= 1) {
+        if (turn >= 3) {
+            for (int i = 0; i < 5; i++) {
+                collectCard.add(suitPot[i]);
+                //System.out.println("pot");
+            }
+        }else if (turn >= 1) {
             for (int i = 0; i < 2 + turn; i++) {
-                System.out.println("Spot");
+                //System.out.println("Spot");
                 collectCard.add(suitPot[i]);
                 }
             } 
@@ -374,7 +659,12 @@ public class MainGameStageController implements Initializable {
         for (int i = 0; i < 2; i++) {
             collectCard.add(numCom[i]);
             }
-        if (turn >= 1) {
+        if (turn >= 3) {
+            for (int i = 0; i < 5; i++) {
+                collectCard.add(numPot[i]);
+                //System.out.println("pot");
+            }
+        }else if (turn >= 1) {
             for (int i = 0; i < 2 + turn; i++) {
                 collectCard.add(numPot[i]);
                 }
@@ -384,7 +674,12 @@ public class MainGameStageController implements Initializable {
            for (int i = 0; i < 2; i++) {
             collectCard.add(suitCom[i]);
             }
-        if (turn == 1 || turn == 2 || turn == 3) {
+        if (turn >= 3) {
+            for (int i = 0; i < 5; i++) {
+                collectCard.add(suitPot[i]);
+                //System.out.println("pot");
+            }
+        }else if (turn == 1 || turn == 2) {
             for (int i = 0; i < 2 + turn; i++) {
                 collectCard.add(suitPot[i]);
                 }
@@ -433,7 +728,7 @@ public class MainGameStageController implements Initializable {
     }
     
     private boolean checkFlush(int turn , String who){
-        System.out.println("checkFlush");
+        //System.out.println("checkFlush");
         boolean isFlush = false;
         int check = 0;
         ArrayList<Integer> collectCard = new ArrayList<>();
@@ -463,7 +758,7 @@ public class MainGameStageController implements Initializable {
     
     private boolean checkFourOfKind(int turn , String who)
     {
-        System.out.println("checkFourOfKind");
+        //System.out.println("checkFourOfKind");
         boolean isFOK = false;
         int check = 0;
         ArrayList<Integer> collectCard = new ArrayList<>();
@@ -493,7 +788,7 @@ public class MainGameStageController implements Initializable {
     
     private int checkThreeOfKind(int turn , String who)
     {
-        System.out.println("checkThreeOfKind");
+        //System.out.println("checkThreeOfKind");
         int numOfTOK = 0;
         int check = 0;
         ArrayList<Integer> collectCard = new ArrayList<>();
@@ -523,7 +818,7 @@ public class MainGameStageController implements Initializable {
     
     private int checkPair(int turn , String who)
     {
-        System.out.println("checkPair");
+        //System.out.println("checkPair");
         int numOfPair = 0;
         int check = 0;
         ArrayList<Integer> collectCard = new ArrayList<>();
@@ -589,6 +884,7 @@ public class MainGameStageController implements Initializable {
         {
             return 2; //#9 One Pair
         } else return 1; //High Card
+        
     }
     
     private void showHandRank(int turnPlayed,String who)
@@ -623,6 +919,8 @@ public class MainGameStageController implements Initializable {
         {
             handRank = "One Pair";
         }else handRank = "High Card";
+        
+        System.out.println("end check");
         
         if(who == "player")
         {
