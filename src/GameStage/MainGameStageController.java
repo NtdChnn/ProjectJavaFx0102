@@ -150,6 +150,10 @@ public class MainGameStageController implements Initializable {
     
     private void lastTurn () throws InterruptedException{
         System.out.println("last");
+        callBtn.setDisable(true);
+        flodBtn.setDisable(true);
+        checkBtn.setDisable(true);
+        raiseBtn.setDisable(true);
         if (comHasPlay == "flod")
         {
         winLebal.setText("You win");
@@ -347,8 +351,14 @@ public class MainGameStageController implements Initializable {
     private void comPlayCall() {
         showComPlay("call");
         //System.out.println(playerRaise);
+        if(comLeftBalance >= playerRaise)
+        {
         comShowBalance(0, playerRaise);
         potShowBalance(playerRaise, 0);
+        } else {
+        comShowBalance(0, comLeftBalance);
+        potShowBalance(comLeftBalance, 0);   
+        }
         playerTurn(comHasPlay);
     }
     
@@ -412,8 +422,14 @@ public class MainGameStageController implements Initializable {
     private void callBtnAction(ActionEvent event) throws InterruptedException {
         playerHasPlay = "call";
         playerPlay.setText("call");
+        if(playerLeftBalance >= comRaise)
+        {
         playerShowBalance(0, comRaise);
         potShowBalance(comRaise, 0);
+        } else {
+        playerShowBalance(0, playerLeftBalance);
+        potShowBalance(playerLeftBalance, 0); 
+        }
         comTurn(turnPlayed, playerHasPlay);
     }
 
@@ -552,6 +568,13 @@ public class MainGameStageController implements Initializable {
 
     private void randCard() { //random Card 
         //System.out.println("randCard");
+        for(int i = 0; i < 4 ; i++)
+        {
+            for(int j = 0 ; j < 13 ; j++)
+            {
+                recheck[i][j] = 0 ;
+            }
+        }
         for (int i = 0; i < 9; i++) {
             int suit;
             int num;
@@ -655,7 +678,6 @@ public class MainGameStageController implements Initializable {
                 }
             } 
         }
-        
         
         return collectCard;
     }
@@ -936,5 +958,4 @@ public class MainGameStageController implements Initializable {
             playerOnHand.setText(handRank);
         } else comOnHand.setText(handRank);
     }
-
 }
