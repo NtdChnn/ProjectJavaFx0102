@@ -108,7 +108,7 @@ public class MainGameStageController implements Initializable {
                 potShowBalance(playerLeftBalance, 0);
                 playerRaise = playerLeftBalance;
             }
-            comTurn(turnPlayed, playerHasPlay, playerLeftBalance, comLeftBalance);
+            comTurn(turnPlayed, playerHasPlay);
         } else //Com is 1st player
         {
             comHasPlay = "raise";
@@ -127,7 +127,7 @@ public class MainGameStageController implements Initializable {
         }
     }
         
-    private void normalTurn (int turnPlayed, int TURNPlay,int playerLeftBalance , int comLeftBalance) throws InterruptedException{
+    private void normalTurn (int turnPlayed, int TURNPlay) throws InterruptedException{
         System.out.println("normal");
         this.turnPlayed++;
         turnPlayed = this.turnPlayed;
@@ -140,15 +140,15 @@ public class MainGameStageController implements Initializable {
         if(turnPlayed == 4 )
         { 
             System.out.println("goto last");
-            lastTurn(playerLeftBalance, comLeftBalance);
+            lastTurn();
         } else if (TURNPlay%2 == 0) //Player is 1st player
         {
             System.out.println("1");
             playerTurn(comHasPlay);
-        } else { System.out.println("2"); comTurn(turnPlayed, playerHasPlay, playerLeftBalance, comLeftBalance);}
+        } else { System.out.println("2"); comTurn(turnPlayed, playerHasPlay);}
     }
     
-    private void lastTurn (int playerLeftBalance , int comLeftBalance) throws InterruptedException{
+    private void lastTurn () throws InterruptedException{
         System.out.println("last");
         if (comHasPlay == "flod")
         {
@@ -185,8 +185,8 @@ public class MainGameStageController implements Initializable {
         continueBtn.setDisable(false);
         }
         
-        if(comLeftBalance == 0 || playerLeftBalance == 0)
-        {endGame(playerLeftBalance,comLeftBalance);}
+        if(this.comLeftBalance == 0 || this.playerLeftBalance == 0)
+        {endGame();}
     }
     
     private void setButton (int TURNPlay)
@@ -203,7 +203,7 @@ public class MainGameStageController implements Initializable {
         }
     }
     
-    private void setBtn (String comHasPlay, int playerLeftBalance, int comLeftBalance)
+    private void setBtn (String comHasPlay)
     {
         if(comLeftBalance == 0 || playerLeftBalance == 0)
         {
@@ -259,7 +259,7 @@ public class MainGameStageController implements Initializable {
     }
     
     
-    private void comTurn (int turnPlayed , String playerHasplay, int playerLeftBalance, int comLeftBalance) throws InterruptedException
+    private void comTurn (int turnPlayed , String playerHasplay) throws InterruptedException
     {
         comPlay.setText("Computer's Turn");
         flodBtn.setDisable(true);
@@ -271,20 +271,26 @@ public class MainGameStageController implements Initializable {
             comPlayCall();
         } else if (playerLeftBalance == 0 || comLeftBalance == 0)
         {
-            comPlayCheck(turnPlayed, TURNPlay, playerLeftBalance, comLeftBalance);
+            if(playerHasplay == "raise")
+            {
+                if(rand.nextInt(2) == 0)
+                    {
+                        comPlayCall();
+                    } else {comPlayFlod();}
+            } else comPlayCheck(turnPlayed, TURNPlay);
         }else {
             if(checkHandRank(turnPlayed, "com") == 1)
             {
                 if(playerHasplay == "raise")
                 {
-                    comPlayFlod(playerLeftBalance,comLeftBalance);
+                    comPlayFlod();
                 }else if((rand.nextInt(120)+1)%12 == 0)
                 {
-                    comPlayFlod(playerLeftBalance,comLeftBalance);
+                    comPlayFlod();
                 } else if((rand.nextInt(120)+1)%60 == 0)
                 {
                     comPlayRaise(50);
-                } else {comPlayCheck(turnPlayed, TURNPlay, playerLeftBalance, comLeftBalance);}
+                } else {comPlayCheck(turnPlayed, TURNPlay);}
             } else if(checkHandRank(turnPlayed, "com") <= 5)
             {
                 if(playerHasplay == "raise")
@@ -292,7 +298,7 @@ public class MainGameStageController implements Initializable {
                     if(rand.nextInt(2) == 0)
                     {
                         comPlayCall();
-                    } else {comPlayFlod(playerLeftBalance,comLeftBalance);}
+                    } else {comPlayFlod();}
                 } else if((rand.nextInt(120)+1)%20 == 0)
                 {
                     comPlayRaise(50);
@@ -307,8 +313,8 @@ public class MainGameStageController implements Initializable {
                     comPlayRaise(500);
                 } else if((rand.nextInt(120)+1)%60 == 0)
                 {
-                    comPlayFlod(playerLeftBalance,comLeftBalance);
-                } else {comPlayCheck(turnPlayed, TURNPlay, playerLeftBalance, comLeftBalance);}
+                    comPlayFlod();
+                } else {comPlayCheck(turnPlayed, TURNPlay);}
             } else {
                 if(playerHasplay == "raise")
                 {
@@ -322,17 +328,17 @@ public class MainGameStageController implements Initializable {
                 } else if((rand.nextInt(120)+1)%10 == 0)
                 {
                     comPlayRaise(500);
-                } else {comPlayCheck(turnPlayed, TURNPlay, playerLeftBalance, comLeftBalance);}
+                } else {comPlayCheck(turnPlayed, TURNPlay);}
             }
         }
     }
     
-    private void comPlayCheck (int turnPlayed,int TURNPlay,int playerLeftBalance,int comLeftBalance) throws InterruptedException{
+    private void comPlayCheck (int turnPlayed,int TURNPlay) throws InterruptedException{
         showComPlay("check");
         if(playerHasPlay == "check")
         {
             
-            normalTurn(turnPlayed, TURNPlay, playerLeftBalance, comLeftBalance);
+            normalTurn(turnPlayed, TURNPlay);
         } else {
             playerTurn(comHasPlay);
         }
@@ -346,9 +352,9 @@ public class MainGameStageController implements Initializable {
         playerTurn(comHasPlay);
     }
     
-    private void comPlayFlod(int playerLeftBalance,int comLeftBalance) throws InterruptedException {
+    private void comPlayFlod() throws InterruptedException {
         showComPlay("flod");
-        lastTurn(playerLeftBalance, comLeftBalance);
+        lastTurn();
     }
     
     private void comPlayRaise(int raise){
@@ -369,12 +375,14 @@ public class MainGameStageController implements Initializable {
     private void playerTurn (String comHasPlay)
     {
         playerPlay.setText("Player" + "'s Turn");
-        setBtn(comHasPlay, playerLeftBalance, comLeftBalance);
+        setBtn(comHasPlay);
     }
     
-    private void endGame (int playerLeftBalance , int comLeftBalance)
+    private void endGame ()
     {
-        if(playerLeftBalance == 0)
+        continueBtn.setDisable(true);
+        continueBtn.setOpacity(0);
+        if(this.playerLeftBalance == 0)
         {
         winLebal.setText("Computer is WINNER");
         } else {winLebal.setText("Player is WINNER");}
@@ -384,7 +392,7 @@ public class MainGameStageController implements Initializable {
     private void flodBtnAction(ActionEvent event) throws InterruptedException {
         playerHasPlay = "flod";
         playerPlay.setText("flod");
-        lastTurn(playerLeftBalance, comLeftBalance);
+        lastTurn();
     }
 
     @FXML
@@ -394,9 +402,9 @@ public class MainGameStageController implements Initializable {
         playerPlay.setText("check");
         if(comHasPlay == "check")
         {
-            normalTurn(turnPlayed, TURNPlay, playerLeftBalance, comLeftBalance);
+            normalTurn(turnPlayed, TURNPlay);
         } else {
-            comTurn(turnPlayed, playerHasPlay, playerLeftBalance, comLeftBalance);
+            comTurn(turnPlayed, playerHasPlay);
         }
     }
 
@@ -406,7 +414,7 @@ public class MainGameStageController implements Initializable {
         playerPlay.setText("call");
         playerShowBalance(0, comRaise);
         potShowBalance(comRaise, 0);
-        comTurn(turnPlayed, playerHasPlay, playerLeftBalance, comLeftBalance);
+        comTurn(turnPlayed, playerHasPlay);
     }
 
     @FXML
@@ -487,7 +495,7 @@ public class MainGameStageController implements Initializable {
         allInBtn.setDisable(true);
         playerRiseBalance.setDisable(true);
         confirmBtn.setDisable(true);
-        comTurn(turnPlayed, playerHasPlay, playerLeftBalance, comLeftBalance);
+        comTurn(turnPlayed, playerHasPlay);
     }
 
     @FXML
