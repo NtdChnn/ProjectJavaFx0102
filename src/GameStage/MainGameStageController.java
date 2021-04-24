@@ -63,7 +63,7 @@ public class MainGameStageController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         turnPlayed = 0;
         TURNPlay = 0;
-        playerName.setText("Name");
+        playerName.setText("Player");
         playerShowBalance(1500,0);
         comShowBalance(1500, 0);
         potShowBalance(0, 0);
@@ -74,6 +74,12 @@ public class MainGameStageController implements Initializable {
         } catch (InterruptedException ex) {
             Logger.getLogger(MainGameStageController.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    /* FIX!! */
+    @FXML
+    private void mainMenuBtnAction(ActionEvent event) {
+        //return to mainMenu
     }
     
     private void firstTurn (int TURNPlay) throws InterruptedException{
@@ -362,7 +368,7 @@ public class MainGameStageController implements Initializable {
     
     private void playerTurn (String comHasPlay)
     {
-        playerPlay.setText("Name" + "'s Turn");
+        playerPlay.setText("Player" + "'s Turn");
         setBtn(comHasPlay, playerLeftBalance, comLeftBalance);
     }
     
@@ -485,18 +491,13 @@ public class MainGameStageController implements Initializable {
     }
 
     @FXML
-    private void mainMenuBtnAction(ActionEvent event) {
-        //return to mainMenu
-    }
-
-    @FXML
     private void restartBtnAction(ActionEvent event) throws InterruptedException {
         playerShowBalance(0,playerLeftBalance);
         comShowBalance(0, comLeftBalance);
         potShowBalance(0, potLeftBalance);
         turnPlayed = 0;
         TURNPlay = 0;
-        playerName.setText("Name");
+        playerName.setText("Player");
         playerShowBalance(1500,0);
         comShowBalance(1500, 0);
         potShowBalance(0, 0);
