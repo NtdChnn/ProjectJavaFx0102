@@ -84,6 +84,10 @@ public class MainGameStageController implements Initializable {
     
     private void firstTurn (int TURNPlay) throws InterruptedException{
         System.out.println("first");
+        com01.setOpacity(1);
+        com02.setOpacity(1);
+        player01.setOpacity(1);
+        player02.setOpacity(1);
         turnPlayed = 0;
         randCard();
         continueBtn.setOpacity(0);
@@ -287,11 +291,11 @@ public class MainGameStageController implements Initializable {
             {
                 if(playerHasplay == "raise")
                 {
-                    comPlayFlod();
-                }else if((rand.nextInt(120)+1)%12 == 0)
-                {
-                    comPlayFlod();
-                } else if((rand.nextInt(120)+1)%60 == 0)
+                    if(rand.nextInt(4) == 0)
+                    {
+                        comPlayCall();
+                    } else {comPlayFlod();}
+                }else if((rand.nextInt(120)+1)%60 == 0)
                 {
                     comPlayRaise(50);
                 } else {comPlayCheck(turnPlayed, TURNPlay);}
@@ -315,9 +319,6 @@ public class MainGameStageController implements Initializable {
                 } else if((rand.nextInt(120)+1)%60 == 0)
                 {
                     comPlayRaise(500);
-                } else if((rand.nextInt(120)+1)%60 == 0)
-                {
-                    comPlayFlod();
                 } else {comPlayCheck(turnPlayed, TURNPlay);}
             } else {
                 if(playerHasplay == "raise")
@@ -350,7 +351,7 @@ public class MainGameStageController implements Initializable {
     
     private void comPlayCall() {
         showComPlay("call");
-        //System.out.println(playerRaise);
+        System.out.println(playerRaise);
         if(comLeftBalance >= playerRaise)
         {
         comShowBalance(0, playerRaise);
@@ -364,6 +365,8 @@ public class MainGameStageController implements Initializable {
     
     private void comPlayFlod() throws InterruptedException {
         showComPlay("flod");
+        com01.setOpacity(0.5);
+        com02.setOpacity(0.5);
         lastTurn();
     }
     
@@ -409,6 +412,8 @@ public class MainGameStageController implements Initializable {
     private void flodBtnAction(ActionEvent event) throws InterruptedException {
         playerHasPlay = "flod";
         playerPlay.setText("flod");
+        player01.setOpacity(0.5);
+        player02.setOpacity(0.5);
         lastTurn();
     }
 
