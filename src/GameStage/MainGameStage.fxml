@@ -171,9 +171,9 @@
          <font>
             <Font name="Script MT Bold" size="13.0" />
          </font></Button>
-      <Label fx:id="winLebal" layoutX="53.0" layoutY="143.0" prefHeight="43.0" prefWidth="168.0" text="who win" textFill="WHITE">
+      <Label fx:id="winLebal" layoutX="53.0" layoutY="143.0" prefHeight="43.0" text="who win" textFill="WHITE">
          <font>
-            <Font name="Script MT Bold" size="20.0" />
+            <Font name="Script MT Bold" size="18.0" />
          </font>
       </Label>
       <Button fx:id="continueBtn" disable="true" layoutX="51.0" layoutY="125.0" mnemonicParsing="false" onAction="#continueBtnAction" opacity="0.0" text="continue">
